@@ -11,14 +11,24 @@ func main() {
 		fmt.Println("Ошибка: Необходимо передать номер карты в качестве аргумента.")
 		os.Exit(1)
 	}
-	cardNumber := os.Args[1]
-	if logics.IsValid(cardNumber) {
-		// По заданию нужно выводить "OK"
-		fmt.Println("OK")
-		os.Exit(0)
-	} else {
-		// По заданию нужно выводить "INCORRECT" в stderr
-		fmt.Fprintln(os.Stderr, "INCORRECT")
-		os.Exit(1)
+
+	command := os.Args[1]
+	switch command {
+	case "validate":
+		if len(os.Args) < 3 {
+			fmt.Fprintln(os.Stderr, "Ошибка: Необходимо передать номер карты для проверки.")
+		}
+
+		cardNumber := os.Args[2]
+
+		if logics.IsValid(cardNumber) {
+			// По заданию нужно выводить "OK"
+			fmt.Println("OK")
+			os.Exit(0)
+		} else {
+			// По заданию нужно выводить "INCORRECT" в stderr
+			fmt.Fprintln(os.Stderr, "INCORRECT")
+			os.Exit(1)
+		}
 	}
 }
