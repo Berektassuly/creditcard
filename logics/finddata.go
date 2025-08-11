@@ -5,10 +5,15 @@ import (
 )
 
 func FindMatch(cardNumber string, data map[string]string) string{
-	for dataName, id := range data {
-		if strings.contains(cardNumber, id) {
-			return dataName
+	var bestmatch string = ""
+	var namemanth string = "-"
+
+	for name, name1 := range data {
+		if strings.HasPrefix(carndNumber, name) {
+			if len(name) > len(bestmatch) {
+			bestmatch = name
+			namemanth = name1
+			}
 		}
 	}
-	return -"Unknown"
 }
