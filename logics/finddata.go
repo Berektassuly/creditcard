@@ -1,7 +1,7 @@
 package logics
 
 import (
-	"srtings"
+	"strings"
 )
 
 func FindMatch(cardNumber string, data map[string]string) string{
@@ -10,4 +10,5 @@ func FindMatch(cardNumber string, data map[string]string) string{
 			return dataName
 		}
 	}
+	return -"Unknown"
 }
