@@ -1,26 +1,26 @@
 package logics
 
-func GetBrands() map[string]string{
+func GetBrands() map[string]string {
 	brands := map[string]string{
-		"Kaspi Gold": 440043,
-		"Forte Black": 404243,
-		"Forte Blue": 517792,
-		"Halyk Bonus": 440563,
-		"Jusan Pay": 539545,
+		"4":  "VISA",
+		"51": "MASTERCARD",
+		"52": "MASTERCARD",
+		"53": "MASTERCARD",
+		"54": "MASTERCARD",
+		"55": "MASTERCARD",
+		"34": "AMEX",
+		"37": "AMEX",
 	}
 	return brands
 }
 
-func GetIssuers() map[string]string{
+func GetIssuers() map[string]string {
 	issuers := map[string]string{
-		"Visa": 4,
-		"MasterCard": 51,
-		"MasterCard": 52,
-		"MasterCard": 53,
-		"MasterCard": 54,
-		"MasterCard": 55,
-		"Amex": 34,
-		"Amex": 37,
+		"440043": "Kaspi Gold",
+		"404243": "Forte Black",
+		"517792": "Forte Blue",
+		"440563": "Halyk Bonus",
+		"539545": "Jusan Pay",
 	}
 	return issuers
 }

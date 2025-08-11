@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func FindMatch(cardNumber string, data map[string]string) string{
+func GetMatch(cardNumber string, data map[string]string) string{
 	var bestmatch string = ""
 	var namemanth string = "-"
 
@@ -16,4 +16,15 @@ func FindMatch(cardNumber string, data map[string]string) string{
 			}
 		}
 	}
+	return bestmatch
+}
+
+func GetBrands( cardnumber string) string {
+	brands := GetBrands()
+	return GetMatch(cardNumber, brands)
+}
+
+func GetIssuers(cardnumber string) string {
+	issuersData := GetIssuers()
+	return GetMatch(cardNumber, issuersData)
 }
