@@ -4,27 +4,27 @@ import (
 	"strings"
 )
 
-func GetMatch(cardNumber string, data map[string]string) string{
-	var bestmatch string = ""
-	var namemanth string = "-"
-
-	for name, name1 := range data {
-		if strings.HasPrefix(carndNumber, name) {
-			if len(name) > len(bestmatch) {
-			bestmatch = name
-			namemanth = name1
+func FindMatch(cardNumber string, data map[string]string) string {
+	var bestMatchPrefix string = ""
+	var foundName string = "-"
+	for prefix, name := range data {
+		if strings.HasPrefix(cardNumber, prefix) {
+			if len(prefix) > len(bestMatchPrefix) {
+				bestMatchPrefix = prefix
+				foundName = name
 			}
 		}
 	}
-	return bestmatch
+
+	return foundName
 }
 
-func GetBrands( cardnumber string) string {
-	brands := GetBrands()
-	return GetMatch(cardNumber, brands)
+func FindBrand(cardNumber string) string {
+	brandsData := GetBrands()
+	return FindMatch(cardNumber, brandsData)
 }
 
-func GetIssuers(cardnumber string) string {
+func FindIssuer(cardNumber string) string {
 	issuersData := GetIssuers()
-	return GetMatch(cardNumber, issuersData)
+	return FindMatch(cardNumber, issuersData)
 }
