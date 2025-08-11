@@ -17,6 +17,7 @@ func main() {
 	case "validate":
 		if len(os.Args) < 3 {
 			fmt.Fprintln(os.Stderr, "Ошибка: Необходимо передать номер карты для проверки.")
+			os.Exit(1)
 		}
 
 		cardNumber := os.Args[2]
