@@ -31,5 +31,9 @@ func main() {
 			fmt.Fprintln(os.Stderr, "INCORRECT")
 			os.Exit(1)
 		}
+	
+	default:
+		fmt.Fprintf(os.Stderr, "Ошибка: Неизвестная команда '%s'.\n", command)
+		os.Exit(1)
 	}
 }
