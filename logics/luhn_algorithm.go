@@ -33,22 +33,21 @@ func IsValid(cardNumber string) bool {
 	return sum%10 == 0
 }
 
-func CalculateLuhnDigit (baseNumber string) string {
+func CalculateLuhnDigit(baseNumber string) string {
 	tempNumber := baseNumber + "0"
 	var sum int
 	parity := len(tempNumber) % 2
 
-	for i, r := tempNumber {
-
+	for i, r := range tempNumber {
 		digit, _ := strconv.Atoi(string(r))
 		if i%2 == parity {
 			digit *= 2
-			if digit >9 {
-				digit -=9
+			if digit > 9 {
+				digit -= 9
 			}
 		}
 		sum += digit
 	}
 	checkDigit := (10 - (sum % 10)) % 10
-	return strconv.Atoi(checkDigit)
+	return strconv.Itoa(checkDigit)
 }
