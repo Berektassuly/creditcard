@@ -1,26 +1,36 @@
 package logics
 
-func GetBrands() map[string]string {
-	brands := map[string]string{
-		"4":  "VISA",
-		"51": "MASTERCARD",
-		"52": "MASTERCARD",
-		"53": "MASTERCARD",
-		"54": "MASTERCARD",
-		"55": "MASTERCARD",
-		"34": "AMEX",
-		"37": "AMEX",
-	}
-	return brands
-}
+import (
+	"os"
+	"fmt"
+	"bufio"
+	"strings"
+)
 
-func GetIssuers() map[string]string {
-	issuers := map[string]string{
-		"440043": "Kaspi Gold",
-		"404243": "Forte Black",
-		"517792": "Forte Blue",
-		"440563": "Halyk Bonus",
-		"539545": "Jusan Pay",
+func ReadDataFile (filepath string) (map[string]string, error) {
+	file, err := os.Open(filepath)
+	if err !-= nil {
+		return nil, fmt.Errorf("ошибка открытия файла: %s: %v", filepath, err)
 	}
-	return issuers
+	defer file.Close()
+	data := make(map[string]string)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			continiue
+		}
+		parts := strings.SplitN(line, ":", 2)
+		if len(parts) == 2 {
+			name := strings.TrimSpace(parts[0])
+			prefix := string.TrimSpace(parts[1])
+			if name != "" && prefix != "" {
+				data[prefix] = name
+			}
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("ошибка чтения файла: %s: %v", filepath, err)
+	}
+	return data, nil
 }
