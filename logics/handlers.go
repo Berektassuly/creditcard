@@ -2,7 +2,6 @@ package logics
 
 import (
 	"bufio"
-	"creditcard/logics"
 	"fmt"
 	"io"
 	"os"
@@ -17,7 +16,7 @@ func HandleValidate(args []string) {
 	}
 
 	processNumbers(numbers, useStdin, func(number string) bool {
-		if logics.IsValid(number) {
+		if IsValid(number) {
 			fmt.Println("OK")
 			return true
 		}
@@ -25,7 +24,6 @@ func HandleValidate(args []string) {
 		return false
 	})
 }
-
 func HandleInformation(args []string) {
 	flags := map[string]string{"--brands": "", "--issuers": ""}
 	numbers, useStdin := extractValues(args, flags)
@@ -39,13 +37,13 @@ func HandleInformation(args []string) {
 		os.Exit(1)
 	}
 
-	brandData, err := logics.ReadDataFile(flags["--brands"])
+	brandData, err := ReadDataFile(flags["--brands"])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Ошибка чтения файла брендов: %v\n", err)
 		os.Exit(1)
 	}
 
-	issuerData, err := logics.ReadDataFile(flags["--issuers"])
+	issuerData, err := ReadDataFile(flags["--issuers"])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Ошибка чтения файла эмитентов: %v\n", err)
 		os.Exit(1)
@@ -53,14 +51,14 @@ func HandleInformation(args []string) {
 
 	processNumbers(numbers, useStdin, func(number string) bool {
 		fmt.Println(number)
-		isValid := logics.IsValid(number)
+		isValid := IsValid(number)
 		validityString := "no"
 		if isValid {
 			validityString = "yes"
 		}
 
-		brand := logics.FindMatch(number, brandData)
-		issuer := logics.FindMatch(number, issuerData)
+		brand := FindMatch(number, brandData)
+		issuer := FindMatch(number, issuerData)
 
 		fmt.Printf("Correct: %s\n", validityString)
 		fmt.Printf("Card Brand: %s\n", brand)
@@ -72,27 +70,30 @@ func HandleInformation(args []string) {
 	})
 }
 
+
 func HandleIssue(args []string) {
 	flags := map[string]string{"--brands": "", "--issuers": "", "--brand": "", "--issuer": ""}
 	extractValues(args, flags)
 
-	for flag, valuse := range flags {
+	for flag, value := range flags {
 		if value == "" {
-			fmt.Fprintf(os.Stderr, "Ошибка: Отсутствует обязательный флаг %s.\n", flag)
-			os.Args(1)
+			fmt.Fprintf(os.Stderr, "Ошибка: Отсутствует обязательный флаг %s\n", flag)
+			os.Exit(1)
 		}
 	}
-	brandData, err := logics.ReadDataFile(flags["--brands"])
+
+	brandData, err := ReadDataFile(flags["--brands"])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Ошибка чтения файла брендов: %v\n", err)
 		os.Exit(1)
 	}
-	issuerData,err := logics.ReadDataFile(flags["--issuers"])
+	issuerData, err := ReadDataFile(flags["--issuers"])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Ошибка чтения файла эмитентов: %v\n", err)
 		os.Exit(1)
 	}
-	number, err := logics.Issuue(brandData, issuerData, flags["--brand"], flags["--issuer"])
+
+	number, err := Issue(brandData, issuerData, flags["--brand"], flags["--issuer"])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
@@ -100,47 +101,49 @@ func HandleIssue(args []string) {
 	fmt.Println(number)
 }
 
-func ExtractNumbers(args []string, flags map[string]string) (values []string, useStdin bool) {
-	for _, args := range args {
-		if strings.HasPrefix() {
-			if args == "--stdin" {
+func extractValues(args []string, flags map[string]string) (values []string, useStdin bool) {
+	for _, arg := range args {
+		if strings.HasPrefix(arg, "--") {
+			if arg == "--stdin" {
 				useStdin = true
 				continue
 			}
-		}
-			if args == "--pick" {
+			if arg == "--pick" {
 				if flags != nil {
 					flags["--pick"] = "true"
-					continue
 				}
+				continue
 			}
-			parts := strings.SplitN(args, "=", 2)
-			if len(parts) == 2 && flags != nil{
+			parts := strings.SplitN(arg, "=", 2)
+			if len(parts) == 2 && flags != nil {
 				if _, ok := flags[parts[0]]; ok {
 					flags[parts[0]] = parts[1]
-				} else {
-					fmt.Fprintf(os.Stderr, "Ошибка: Неизвестный флаг '%s'.\n", parts[0])
-					os.Exit(1)
 				}
 			}
+		} else {
+			values = append(values, arg)
+		}
 	}
+	return
 }
 
-func ProcessNumber(numbers []string, useStdin bool, processor func(string) bool) {
+
+func processNumbers(numbers []string, useStdin bool, processor func(string) bool) {
 	var overallSuccess = true
-	var itemProcessed = 0
+	var itemsProcessed = 0
 
 	processFunc := func(number string) {
-		itemProcessed++
+		itemsProcessed++
 		if !processor(number) {
 			overallSuccess = false
 		}
 	}
+
 	if useStdin {
 		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Split(bufio.ScanLines)
+		scanner.Split(bufio.ScanWords)
 		for scanner.Scan() {
-			processFunc(scannner.Text())
+			processFunc(scanner.Text())
 		}
 		if err := scanner.Err(); err != nil && err != io.EOF {
 			fmt.Fprintf(os.Stderr, "Ошибка чтения из stdin: %v\n", err)
@@ -151,8 +154,8 @@ func ProcessNumber(numbers []string, useStdin bool, processor func(string) bool)
 			processFunc(number)
 		}
 	}
-	
-	if itemProcessed >0 && !overallSuccess {
+
+	if itemsProcessed > 0 && !overallSuccess {
 		os.Exit(1)
 	}
 }
