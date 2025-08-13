@@ -159,3 +159,32 @@ func processNumbers(numbers []string, useStdin bool, processor func(string) bool
 		os.Exit(1)
 	}
 }
+
+func HandleGenerate(args []string) {
+	flags := map[string]string{"--pick": "false"}
+	patterns, _ := extractValues(args, flags)
+
+	if len(patterns) != 1 {
+			fmt.Fprintln(os.Stderr, "Ошибка: необходимо передать ровно один шаблон для генерации")
+			os.Exit(1)
+		}
+		pattern := patterns[0]
+
+		generated, err := Generate(pattern)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+		if flags["--pick"] == "true" {
+			picked, err := PickRandom(generated)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				os.Exit(1)
+			}
+			fmt.Println(picked)
+		} else {
+			for _, num := range generated {
+				fmt.Println(num)
+			}
+		}
+}
