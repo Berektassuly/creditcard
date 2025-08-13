@@ -20,10 +20,10 @@ func main() {
 		logics.HandleValidate(args)
 	case "information":
 		logics.HandleInformation(args)
-	case "issue":
-		logics.HandleIssue(args)
 	case "generate":
 		logics.HandleGenerate(args)
+	case "issue":
+		logics.HandleIssue(args)
 	default:
 		fmt.Fprintf(os.Stderr, "Неизвестная команда: %s\n", command)
 		os.Exit(1)

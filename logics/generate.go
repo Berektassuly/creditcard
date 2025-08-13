@@ -13,7 +13,7 @@ func Generate(pattern string) ([]string, error) {
 	if asterisCount < 1 || asterisCount > 4 {
 		return nil, fmt.Errorf("ошибка: количество '*' должно быть от 1 до 4")
 	}
-	if strings.HasSuffix(pattern, strings.Repeat("*", asterisCount)) {
+	if !strings.HasSuffix(pattern, strings.Repeat("*", asterisCount)) {
 		return nil, fmt.Errorf("ошибка: смволы '*' должны находится в конце шаблона")
 	}
 
