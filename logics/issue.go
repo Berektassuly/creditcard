@@ -31,19 +31,29 @@ func Issue(brandData []BrandOrIssuer, issuerData []BrandOrIssuer, targetBrand, t
 	if !isBrandValidForIssuer {
 		return "", fmt.Errorf("бренд '%s' не подходит для эмитента '%s'", targetBrand, targetIssuer)
 	}
-	length := 16
-	if targetBrand == "AMEX" {
+
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	
+	var length int
+	switch targetBrand {
+	case "AMEX":
 		length = 15
+	case "VISA":
+		lengths := []int{13, 16}
+		length = lengths[r.Intn(len(lengths))]
+	default:
+		length = 16
 	}
+
 	randomDigitsCount := length - len(issuerPrefix) - 1
 	if randomDigitsCount < 0 {
-		return "", fmt.Errorf("префикс эмитента '%s' слишком длинный для генерации номера", issuerPrefix)
+		return "", fmt.Errorf("префикс эмитента '%s' (%s) слишком длинный для генерации номера карты длиной %d", targetIssuer, issuerPrefix, length)
 	}
-	rand.Seed(time.Now().UnixNano())
+
 	var builder strings.Builder
 	builder.WriteString(issuerPrefix)
 	for i := 0; i < randomDigitsCount; i++ {
-		builder.WriteString(strconv.Itoa(rand.Intn(10)))
+		builder.WriteString(strconv.Itoa(r.Intn(10)))
 	}
 	baseNumber := builder.String()
 	checkDigit := CalculateLuhnDigit(baseNumber)
