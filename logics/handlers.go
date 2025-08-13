@@ -23,6 +23,7 @@ func HandleValidate(args []string) {
 				fmt.Println("OK")
 			} else {
 				fmt.Fprintln(os.Stderr, "INCORRECT")
+				os.Exit(1)
 			}
 		}
 		if err := scanner.Err(); err != nil && err != io.EOF {
@@ -35,6 +36,7 @@ func HandleValidate(args []string) {
 				fmt.Println("OK")
 			} else {
 				fmt.Fprintln(os.Stderr, "INCORRECT")
+				os.Exit(1)
 			}
 		}
 	}
