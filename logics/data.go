@@ -7,13 +7,19 @@ import (
 	"strings"
 )
 
-func ReadDataFile (filepath string) (map[string]string, error) {
+type BrandOrIssuer struct {
+	Name   string
+	Prefix string
+}
+
+func ReadDataFile (filepath string) ([]BrandOrIssuer, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка открытия файла: %s: %v", filepath, err)
 	}
 	defer file.Close()
-	data := make(map[string]string)
+
+	var data []BrandOrIssuer
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -25,7 +31,8 @@ func ReadDataFile (filepath string) (map[string]string, error) {
 			name := strings.TrimSpace(parts[0])
 			prefix := strings.TrimSpace(parts[1])
 			if name != "" && prefix != "" {
-				data[prefix] = name
+				newItem := BrandOrIssuer{Name: name, Prefix: prefix}
+				data = append(data, newItem)
 			}
 		}
 	}
@@ -35,14 +42,14 @@ func ReadDataFile (filepath string) (map[string]string, error) {
 	return data, nil
 }
 
-func FindMatch(cardNumber string, data map[string]string) string {
+func FindMatch(cardNumber string, data []BrandOrIssuer) string {
 	bestMatchPrefix := ""
 	foundName := "-"
-	for prefix, name := range data {
-		if strings.HasPrefix(cardNumber, prefix) {
-			if len(prefix) > len(bestMatchPrefix) {
-				bestMatchPrefix = prefix
-				foundName = name
+	for _, item := range data {
+		if strings.HasPrefix(cardNumber, item.Prefix) {
+			if len(item.Prefix) > len(bestMatchPrefix) {
+				bestMatchPrefix = item.Prefix
+				foundName = item.Name
 			}
 		}
 	}
