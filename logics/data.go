@@ -44,16 +44,15 @@ func ReadDataFile(filepath string) ([]BrandOrIssuer, error) {
 }
 
 func FindMatch(cardNumber string, data []BrandOrIssuer) string {
-	bestMatchPrefix := ""
-	foundName := "-"
+        bestMatchPrefix := ""
+        foundName := "-"
 
-	for _, item := range data {
-		if strings.HasPrefix(cardNumber, item.Prefix) {
-			if len(item.Prefix) > len(bestMatchPrefix) {
-				bestMatchPrefix = item.Prefix
-				foundName = item.Name
-			}
-		}
-	}
-	return foundName
+        for _, item := range data {
+                if strings.HasPrefix(cardNumber, item.Prefix) {
+                        if len(item.Prefix) > len(bestMatchPrefix) {
+                                foundName = item.Name
+                        }
+                }
+        }
+        return foundName
 }
