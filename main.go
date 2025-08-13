@@ -22,6 +22,8 @@ func main() {
 		logics.HandleInformation(args)
 	case "issue":
 		logics.HandleIssue(args)
+	case "generate":
+		logics.HandleGenerate(args)
 	default:
 		fmt.Fprintf(os.Stderr, "Неизвестная команда: %s\n", command)
 		os.Exit(1)
