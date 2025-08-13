@@ -14,17 +14,23 @@ func HandleValidate(args []string) {
 		fmt.Fprintln(os.Stderr, "Ошибка: Необходимо передать номер карты для проверки или использовать флаг --stdin.")
 		os.Exit(1)
 	}
+
+	anyIncorrect := false
+
+	processNumber := func(number string) {
+		if IsValid(number) {
+			fmt.Println("OK")
+		} else {
+			fmt.Fprintln(os.Stderr, "INCORRECT")
+			anyIncorrect = true
+		}
+	}
+
 	if useStdin {
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Split(bufio.ScanWords)
 		for scanner.Scan() {
-			number := scanner.Text()
-			if IsValid(number) {
-				fmt.Println("OK")
-			} else {
-				fmt.Fprintln(os.Stderr, "INCORRECT")
-				os.Exit(1)
-			}
+			processNumber(scanner.Text())
 		}
 		if err := scanner.Err(); err != nil && err != io.EOF {
 			fmt.Fprintf(os.Stderr, "Ошибка чтения из stdin: %v\n", err)
@@ -32,13 +38,12 @@ func HandleValidate(args []string) {
 		}
 	} else {
 		for _, number := range numbers {
-			if IsValid(number) {
-				fmt.Println("OK")
-			} else {
-				fmt.Fprintln(os.Stderr, "INCORRECT")
-				os.Exit(1)
-			}
+			processNumber(number)
 		}
+	}
+
+	if anyIncorrect {
+		os.Exit(1)
 	}
 }
 
