@@ -12,7 +12,7 @@ type BrandOrIssuer struct {
 	Prefix string
 }
 
-func ReadDataFile (filepath string) ([]BrandOrIssuer, error) {
+func ReadDataFile(filepath string) ([]BrandOrIssuer, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка открытия файла: %s: %v", filepath, err)
@@ -21,6 +21,7 @@ func ReadDataFile (filepath string) ([]BrandOrIssuer, error) {
 
 	var data []BrandOrIssuer
 	scanner := bufio.NewScanner(file)
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line == "" {
@@ -45,6 +46,7 @@ func ReadDataFile (filepath string) ([]BrandOrIssuer, error) {
 func FindMatch(cardNumber string, data []BrandOrIssuer) string {
 	bestMatchPrefix := ""
 	foundName := "-"
+
 	for _, item := range data {
 		if strings.HasPrefix(cardNumber, item.Prefix) {
 			if len(item.Prefix) > len(bestMatchPrefix) {
