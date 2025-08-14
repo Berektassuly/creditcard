@@ -1,4 +1,4 @@
-# --- PREPARATION: CREATE FILES AND BUILD THE PROJECT ---
+﻿# --- PREPARATION: CREATE FILES AND BUILD THE PROJECT ---
 Clear-Host
 
 # Function to display results

@@ -1,4 +1,4 @@
-package logics
+﻿package logics
 
 import (
 	"strconv"

@@ -1,4 +1,4 @@
-package logics
+﻿package logics
 
 import (
 	"bufio"
@@ -130,36 +130,6 @@ func HandleInformation(args []string) {
 			processFunc(number)
 		}
 	}
-}
-
-func HandleIssue(args []string) {
-	flags := map[string]string{"--brands": "", "--issuers": "", "--brand": "", "--issuer": ""}
-	extractValues(args, flags)
-
-	for flag, value := range flags {
-		if value == "" {
-			fmt.Fprintf(os.Stderr, "Ошибка: Отсутствует обязательный флаг %s\n", flag)
-			os.Exit(1)
-		}
-	}
-
-	brandData, err := ReadDataFile(flags["--brands"])
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Ошибка чтения файла брендов: %v\n", err)
-		os.Exit(1)
-	}
-	issuerData, err := ReadDataFile(flags["--issuers"])
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Ошибка чтения файла эмитентов: %v\n", err)
-		os.Exit(1)
-	}
-
-	number, err := Issue(brandData, issuerData, flags["--brand"], flags["--issuer"])
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(number)
 }
 
 func extractValues(args []string, flags map[string]string) (values []string, useStdin bool) {
