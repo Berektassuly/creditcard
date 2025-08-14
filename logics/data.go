@@ -22,8 +22,14 @@ func ReadDataFile(filepath string) ([]BrandOrIssuer, error) {
 	var data []BrandOrIssuer
 	scanner := bufio.NewScanner(file)
 
+	isFirstLine := true 
 	for scanner.Scan() {
 		line := scanner.Text()
+		if isFirstLine {
+			line = strings.TrimPrefix(line, "\uFEFF")
+			isFirstLine = false
+		}
+
 		if line == "" {
 			continue
 		}
