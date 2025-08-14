@@ -17,7 +17,7 @@ func HandleValidate(args []string) {
 
 	anyIncorrect := false
 	processNumber := func(number string) {
-		if len(number) >= 13 && IsValid(number) {
+		if IsValid(number) {
 			fmt.Println("OK")
 		} else {
 			fmt.Fprintln(os.Stderr, "INCORRECT")
@@ -52,25 +52,19 @@ func HandleGenerate(args []string) {
 		os.Exit(1)
 	}
 	pattern := patterns[0]
+	generated, err := Generate(pattern)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
 	if flags["--pick"] == "true" {
-		for {
-			generated, err := Generate(pattern)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				os.Exit(1)
-			}
-			if len(generated) > 0 {
-				picked, _ := PickRandom(generated)
-				fmt.Println(picked)
-				return
-			}
-		}
-	} else {
-		generated, err := Generate(pattern)
+		picked, err := PickRandom(generated)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
+		fmt.Println(picked)
+	} else {
 		for _, num := range generated {
 			fmt.Println(num)
 		}
@@ -103,14 +97,16 @@ func HandleInformation(args []string) {
 	}
 	processFunc := func(number string) {
 		fmt.Println(number)
-		
 		validityString := "no"
+		brand := "-"
+		issuer := "-"
 		if IsValid(number) {
 			validityString = "yes"
+			brand = FindMatch(number, brandData)
+			issuer = FindMatch(number, issuerData)
+		} else {
 		}
 
-		brand := FindMatch(number, brandData)
-		issuer := FindMatch(number, issuerData)
 		fmt.Printf("Correct: %s\n", validityString)
 		fmt.Printf("Card Brand: %s\n", brand)
 		fmt.Printf("Card Issuer: %s\n", issuer)
