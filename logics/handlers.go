@@ -71,8 +71,6 @@ func HandleGenerate(args []string) {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
-		if len(generated) == 0 {
-		}
 		for _, num := range generated {
 			fmt.Println(num)
 		}
@@ -112,14 +110,7 @@ func HandleInformation(args []string) {
 		}
 
 		brand := FindMatch(number, brandData)
-		if brand == "" {
-			brand = "-"
-		}
 		issuer := FindMatch(number, issuerData)
-		if issuer == "" {
-			issuer = "-"
-		}
-
 		fmt.Printf("Correct: %s\n", validityString)
 		fmt.Printf("Card Brand: %s\n", brand)
 		fmt.Printf("Card Issuer: %s\n", issuer)
@@ -130,7 +121,7 @@ func HandleInformation(args []string) {
 		for scanner.Scan() {
 			processFunc(scanner.Text())
 		}
-		if err := scanner.Err(); err != nil {
+		if err := scanner.Err(); err != nil && err != io.EOF {
 			fmt.Fprintf(os.Stderr, "Ошибка чтения из stdin: %v\n", err)
 			os.Exit(1)
 		}
