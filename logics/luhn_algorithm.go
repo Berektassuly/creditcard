@@ -5,48 +5,49 @@ import (
 	"strings"
 )
 
-
 func IsValid(cardNumber string) bool {
 	cardNumber = strings.TrimSpace(cardNumber)
-	if len(cardNumber) == 0 {
+	if len(cardNumber) < 13 {
 		return false
 	}
 
-	var sum int
-	parity := len(cardNumber) % 2
-	for i, r := range cardNumber {
-		digit, err := strconv.Atoi(string(r))
+	sum := 0
+	double := false
+	for i := len(cardNumber) - 1; i >= 0; i-- {
+		digit, err := strconv.Atoi(string(cardNumber[i]))
 		if err != nil {
 			return false
 		}
 
-		if i%2 == parity {
+		if double {
 			digit *= 2
 			if digit > 9 {
 				digit -= 9
 			}
 		}
 		sum += digit
+		double = !double
 	}
 
 	return sum%10 == 0
 }
 
 func CalculateLuhnDigit(baseNumber string) string {
-	tempNumber := baseNumber + "0"
-	var sum int
-	parity := len(tempNumber) % 2
+	sum := 0
+	double := true
+	for i := len(baseNumber) - 1; i >= 0; i-- {
+		digit, _ := strconv.Atoi(string(baseNumber[i]))
 
-	for i, r := range tempNumber {
-		digit, _ := strconv.Atoi(string(r))
-		if i%2 == parity {
+		if double {
 			digit *= 2
 			if digit > 9 {
 				digit -= 9
 			}
 		}
 		sum += digit
+		double = !double
 	}
+
 	checkDigit := (10 - (sum % 10)) % 10
 	return strconv.Itoa(checkDigit)
 }
