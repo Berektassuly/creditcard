@@ -4,40 +4,42 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"sort"
 	"strings"
 	"time"
 )
 
 func Generate(pattern string) ([]string, error) {
-	asterisCount := strings.Count(pattern, "*")
-	if asterisCount < 1 || asterisCount > 4 {
+	asteriskCount := strings.Count(pattern, "*")
+	if asteriskCount < 1 || asteriskCount > 4 {
 		return nil, fmt.Errorf("ошибка: количество '*' должно быть от 1 до 4")
 	}
-	if !strings.HasSuffix(pattern, strings.Repeat("*", asterisCount)) {
-		return nil, fmt.Errorf("ошибка: смволы '*' должны находится в конце шаблона")
+	if !strings.HasSuffix(pattern, strings.Repeat("*", asteriskCount)) {
+		return nil, fmt.Errorf("ошибка: символы '*' должны находиться в конце шаблона")
 	}
 
-	base := strings.TrimRight(pattern, "*")
-	if len(base) + asterisCount < 13 {
+	base := strings.TrimSuffix(pattern, strings.Repeat("*", asteriskCount))
+	if len(base)+asteriskCount < 13 {
 		return nil, fmt.Errorf("ошибка: итоговый номер карты слишком короткий")
 	}
 
 	var validNumbers []string
-	limit := int(math.Pow10(asterisCount))
+	limit := int(math.Pow10(asteriskCount))
 
 	for i := 0; i < limit; i++ {
-		suffix := fmt.Sprintf("%0*d", asterisCount, i)
+		suffix := fmt.Sprintf("%0*d", asteriskCount, i)
 		candidate := base + suffix
 		if IsValid(candidate) {
 			validNumbers = append(validNumbers, candidate)
 		}
 	}
+	sort.Strings(validNumbers)
 	return validNumbers, nil
 }
 
 func PickRandom(numbers []string) (string, error) {
 	if len(numbers) == 0 {
-		return "", fmt.Errorf("не удалось сгенерировать ниодного валидного номера")
+		return "", fmt.Errorf("не удалось сгенерировать ни одного валидного номера")
 	}
 	return numbers[rand.New(rand.NewSource(time.Now().UnixNano())).Intn(len(numbers))], nil
 }
