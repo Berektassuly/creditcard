@@ -150,7 +150,6 @@ func extractValues(args []string, flags map[string]string) (values []string, use
 	return
 }
 
-
 func processNumbers(numbers []string, useStdin bool, processor func(string) bool) {
 	var overallSuccess = true
 	var itemsProcessed = 0
@@ -188,26 +187,39 @@ func HandleGenerate(args []string) {
 	patterns, _ := extractValues(args, flags)
 
 	if len(patterns) != 1 {
-			fmt.Fprintln(os.Stderr, "Ошибка: необходимо передать ровно один шаблон для генерации")
-			os.Exit(1)
-		}
-		pattern := patterns[0]
+		fmt.Fprintln(os.Stderr, "Ошибка: необходимо передать ровно один шаблон для генерации")
+		os.Exit(1)
+	}
+	pattern := patterns[0]
 
+	if flags["--pick"] == "true" {
+		for {
+			generated, err := Generate(pattern)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Ошибка при генерации: %v\n", err)
+				os.Exit(1)
+			}
+
+			if len(generated) > 0 {
+				picked, _ := PickRandom(generated)
+				fmt.Println(picked)
+				return
+			}
+		}
+	} else {
 		generated, err := Generate(pattern)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
-		if flags["--pick"] == "true" {
-			picked, err := PickRandom(generated)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				os.Exit(1)
-			}
-			fmt.Println(picked)
-		} else {
-			for _, num := range generated {
-				fmt.Println(num)
-			}
+
+		if len(generated) == 0 {
+			fmt.Fprintln(os.Stderr, "Не удалось сгенерировать ни одного валидного номера для шаблона")
+			os.Exit(1)
 		}
+
+		for _, num := range generated {
+			fmt.Println(num)
+		}
+	}
 }
