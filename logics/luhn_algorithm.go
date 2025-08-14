@@ -24,7 +24,7 @@ func IsValid(cardNumber string) bool {
 			}
 		}
 		sum += digit
-		isSecond = !isSecond
+		isSecond = !isSecond 
 	}
 
 	return sum%10 == 0
@@ -35,7 +35,6 @@ func CalculateLuhnDigit(baseNumber string) string {
 	isSecond := true
 	for i := len(baseNumber) - 1; i >= 0; i-- {
 		digit, _ := strconv.Atoi(string(baseNumber[i]))
-
 		if isSecond {
 			digit *= 2
 			if digit > 9 {
@@ -45,7 +44,6 @@ func CalculateLuhnDigit(baseNumber string) string {
 		sum += digit
 		isSecond = !isSecond
 	}
-
 	checkDigit := (10 - (sum % 10)) % 10
 	return strconv.Itoa(checkDigit)
 }
