@@ -95,6 +95,7 @@ func HandleInformation(args []string) {
 		fmt.Fprintf(os.Stderr, "Ошибка чтения файла эмитентов: %v\n", err)
 		os.Exit(1)
 	}
+	var anyInvalidNumbers bool
 	processFunc := func(number string) {
 		fmt.Println(number)
 		validityString := "no"
@@ -105,6 +106,7 @@ func HandleInformation(args []string) {
 			brand = FindMatch(number, brandData)
 			issuer = FindMatch(number, issuerData)
 		} else {
+			anyInvalidNumbers = true
 		}
 
 		fmt.Printf("Correct: %s\n", validityString)
@@ -125,6 +127,10 @@ func HandleInformation(args []string) {
 		for _, number := range numbers {
 			processFunc(number)
 		}
+	}
+
+	if anyInvalidNumbers {
+		os.Exit(1)
 	}
 }
 
