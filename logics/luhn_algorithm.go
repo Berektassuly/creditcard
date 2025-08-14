@@ -8,7 +8,7 @@ import (
 
 func IsValid(cardNumber string) bool {
 	cardNumber = strings.TrimSpace(cardNumber)
-	if len(cardNumber) < 13 {
+	if len(cardNumber) == 0 {
 		return false
 	}
 
@@ -26,7 +26,6 @@ func IsValid(cardNumber string) bool {
 				digit -= 9
 			}
 		}
-
 		sum += digit
 	}
 

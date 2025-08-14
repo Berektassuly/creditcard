@@ -192,32 +192,19 @@ func HandleGenerate(args []string) {
 	}
 	pattern := patterns[0]
 
+	generated, err := Generate(pattern)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+	if len(generated) == 0 {
+		fmt.Fprintln(os.Stderr, "Не удалось сгенерировать ни одного валидного номера для шаблона")
+		os.Exit(1)
+	}
 	if flags["--pick"] == "true" {
-		for {
-			generated, err := Generate(pattern)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Ошибка при генерации: %v\n", err)
-				os.Exit(1)
-			}
-
-			if len(generated) > 0 {
-				picked, _ := PickRandom(generated)
-				fmt.Println(picked)
-				return
-			}
-		}
+		picked, _ := PickRandom(generated)
+		fmt.Println(picked)
 	} else {
-		generated, err := Generate(pattern)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-			os.Exit(1)
-		}
-
-		if len(generated) == 0 {
-			fmt.Fprintln(os.Stderr, "Не удалось сгенерировать ни одного валидного номера для шаблона")
-			os.Exit(1)
-		}
-
 		for _, num := range generated {
 			fmt.Println(num)
 		}
