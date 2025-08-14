@@ -16,16 +16,14 @@ func HandleValidate(args []string) {
 	}
 
 	anyIncorrect := false
-
 	processNumber := func(number string) {
-		if IsValid(number) {
+		if len(number) >= 13 && IsValid(number) {
 			fmt.Println("OK")
 		} else {
 			fmt.Fprintln(os.Stderr, "INCORRECT")
 			anyIncorrect = true
 		}
 	}
-
 	if useStdin {
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Split(bufio.ScanWords)
@@ -41,9 +39,43 @@ func HandleValidate(args []string) {
 			processNumber(number)
 		}
 	}
-
 	if anyIncorrect {
 		os.Exit(1)
+	}
+}
+
+func HandleGenerate(args []string) {
+	flags := map[string]string{"--pick": "false"}
+	patterns, _ := extractValues(args, flags)
+	if len(patterns) != 1 {
+		fmt.Fprintln(os.Stderr, "Ошибка: необходимо передать ровно один шаблон для генерации")
+		os.Exit(1)
+	}
+	pattern := patterns[0]
+	if flags["--pick"] == "true" {
+		for {
+			generated, err := Generate(pattern)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				os.Exit(1)
+			}
+			if len(generated) > 0 {
+				picked, _ := PickRandom(generated)
+				fmt.Println(picked)
+				return
+			}
+		}
+	} else {
+		generated, err := Generate(pattern)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+		if len(generated) == 0 {
+		}
+		for _, num := range generated {
+			fmt.Println(num)
+		}
 	}
 }
 
@@ -71,28 +103,43 @@ func HandleInformation(args []string) {
 		fmt.Fprintf(os.Stderr, "Ошибка чтения файла эмитентов: %v\n", err)
 		os.Exit(1)
 	}
-
-	processNumbers(numbers, useStdin, func(number string) bool {
+	processFunc := func(number string) {
 		fmt.Println(number)
-		isValid := IsValid(number)
+		
 		validityString := "no"
-		if isValid {
+		if IsValid(number) {
 			validityString = "yes"
 		}
 
 		brand := FindMatch(number, brandData)
+		if brand == "" {
+			brand = "-"
+		}
 		issuer := FindMatch(number, issuerData)
+		if issuer == "" {
+			issuer = "-"
+		}
 
 		fmt.Printf("Correct: %s\n", validityString)
 		fmt.Printf("Card Brand: %s\n", brand)
 		fmt.Printf("Card Issuer: %s\n", issuer)
-		if len(numbers) > 1 || useStdin {
-			fmt.Println()
+	}
+	if useStdin {
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Split(bufio.ScanWords)
+		for scanner.Scan() {
+			processFunc(scanner.Text())
 		}
-		return isValid
-	})
+		if err := scanner.Err(); err != nil {
+			fmt.Fprintf(os.Stderr, "Ошибка чтения из stdin: %v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		for _, number := range numbers {
+			processFunc(number)
+		}
+	}
 }
-
 
 func HandleIssue(args []string) {
 	flags := map[string]string{"--brands": "", "--issuers": "", "--brand": "", "--issuer": ""}
@@ -148,65 +195,4 @@ func extractValues(args []string, flags map[string]string) (values []string, use
 		}
 	}
 	return
-}
-
-func processNumbers(numbers []string, useStdin bool, processor func(string) bool) {
-	var overallSuccess = true
-	var itemsProcessed = 0
-
-	processFunc := func(number string) {
-		itemsProcessed++
-		if !processor(number) {
-			overallSuccess = false
-		}
-	}
-
-	if useStdin {
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Split(bufio.ScanWords)
-		for scanner.Scan() {
-			processFunc(scanner.Text())
-		}
-		if err := scanner.Err(); err != nil && err != io.EOF {
-			fmt.Fprintf(os.Stderr, "Ошибка чтения из stdin: %v\n", err)
-			os.Exit(1)
-		}
-	} else {
-		for _, number := range numbers {
-			processFunc(number)
-		}
-	}
-
-	if itemsProcessed > 0 && !overallSuccess {
-		os.Exit(1)
-	}
-}
-
-func HandleGenerate(args []string) {
-	flags := map[string]string{"--pick": "false"}
-	patterns, _ := extractValues(args, flags)
-
-	if len(patterns) != 1 {
-		fmt.Fprintln(os.Stderr, "Ошибка: необходимо передать ровно один шаблон для генерации")
-		os.Exit(1)
-	}
-	pattern := patterns[0]
-
-	generated, err := Generate(pattern)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
-	if len(generated) == 0 {
-		fmt.Fprintln(os.Stderr, "Не удалось сгенерировать ни одного валидного номера для шаблона")
-		os.Exit(1)
-	}
-	if flags["--pick"] == "true" {
-		picked, _ := PickRandom(generated)
-		fmt.Println(picked)
-	} else {
-		for _, num := range generated {
-			fmt.Println(num)
-		}
-	}
 }
