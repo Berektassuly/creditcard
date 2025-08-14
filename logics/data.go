@@ -21,25 +21,20 @@ func ReadDataFile(filepath string) ([]BrandOrIssuer, error) {
 
 	var data []BrandOrIssuer
 	scanner := bufio.NewScanner(file)
-
-	isFirstLine := true 
+	isFirstLine := true
 	for scanner.Scan() {
 		line := scanner.Text()
 		if isFirstLine {
 			line = strings.TrimPrefix(line, "\uFEFF")
 			isFirstLine = false
 		}
-
-		if line == "" {
-			continue
-		}
+		if line == "" { continue }
 		parts := strings.SplitN(line, ":", 2)
 		if len(parts) == 2 {
 			name := strings.TrimSpace(parts[0])
 			prefix := strings.TrimSpace(parts[1])
 			if name != "" && prefix != "" {
-				newItem := BrandOrIssuer{Name: name, Prefix: prefix}
-				data = append(data, newItem)
+				data = append(data, BrandOrIssuer{Name: name, Prefix: prefix})
 			}
 		}
 	}
