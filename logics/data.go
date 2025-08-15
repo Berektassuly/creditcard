@@ -1,4 +1,4 @@
-﻿package logics
+package logics
 
 import (
 	"bufio"
@@ -28,7 +28,9 @@ func ReadDataFile(filepath string) ([]BrandOrIssuer, error) {
 			line = strings.TrimPrefix(line, "\uFEFF")
 			isFirstLine = false
 		}
-		if line == "" { continue }
+		if line == "" {
+			continue
+		}
 		parts := strings.SplitN(line, ":", 2)
 		if len(parts) == 2 {
 			name := strings.TrimSpace(parts[0])

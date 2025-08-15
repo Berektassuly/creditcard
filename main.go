@@ -1,9 +1,10 @@
-﻿package main
+package main
 
 import (
-	"creditcard/logics"
 	"fmt"
 	"os"
+
+	"creditcard/logics"
 )
 
 func main() {

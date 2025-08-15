@@ -1,4 +1,4 @@
-﻿package logics
+package logics
 
 import (
 	"fmt"
@@ -10,30 +10,38 @@ import (
 
 func Issue(brandData []BrandOrIssuer, issuerData []BrandOrIssuer, targetBrand, targetIssuer string) (string, error) {
 	var issuerPrefix string
+	issuerFound := false
 	for _, item := range issuerData {
 		if item.Name == targetIssuer {
 			issuerPrefix = item.Prefix
+			issuerFound = true
 			break
 		}
 	}
-	if issuerPrefix == "" {
+	if !issuerFound {
 		return "", fmt.Errorf("эмитент '%s' не найден", targetIssuer)
 	}
-	isBrandValidForIssuer := false
+
+	brandFound := false
+	isCompatible := false
 	for _, item := range brandData {
 		if item.Name == targetBrand {
+			brandFound = true
 			if strings.HasPrefix(issuerPrefix, item.Prefix) {
-				isBrandValidForIssuer = true
+				isCompatible = true
 				break
 			}
 		}
 	}
-	if !isBrandValidForIssuer {
+
+	if !brandFound {
+		return "", fmt.Errorf("бренд '%s' не найден", targetBrand)
+	}
+	if !isCompatible {
 		return "", fmt.Errorf("бренд '%s' не подходит для эмитента '%s'", targetBrand, targetIssuer)
 	}
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	
 	var length int
 	switch targetBrand {
 	case "AMEX":
@@ -47,7 +55,7 @@ func Issue(brandData []BrandOrIssuer, issuerData []BrandOrIssuer, targetBrand, t
 
 	randomDigitsCount := length - len(issuerPrefix) - 1
 	if randomDigitsCount < 0 {
-		return "", fmt.Errorf("префикс эмитента '%s' (%s) слишком длинный для генерации номера карты длиной %d", targetIssuer, issuerPrefix, length)
+		return "", fmt.Errorf("префикс эмитента '%s' (%s) слишком длинный", targetIssuer, issuerPrefix)
 	}
 
 	var builder strings.Builder
