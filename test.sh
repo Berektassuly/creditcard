@@ -1,0 +1,1 @@
+for ((i = 0 ; i < 1000 ; i++ )); do ./creditcard generate --pick "440043018030****"; done
