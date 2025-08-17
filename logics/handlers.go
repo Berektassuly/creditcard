@@ -10,35 +10,48 @@ import (
 
 func HandleValidate(args []string) {
 	numbers, useStdin := extractValues(args, nil)
-	if !useStdin && len(numbers) == 0 {
+	if useStdin {
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Split(bufio.ScanWords)
+		hasInput := false
+		anyIncorrect := false
+		for scanner.Scan() {
+			hasInput = true
+			number := strings.ReplaceAll(scanner.Text(), " ", "")
+			if number == "" || !IsValid(number) {
+				fmt.Fprintln(os.Stderr, "INCORRECT")
+				anyIncorrect = true
+			} else {
+				fmt.Println("OK")
+			}
+		}
+		if err := scanner.Err(); err != nil && err != io.EOF {
+			fmt.Fprintln(os.Stderr, "INCORRECT")
+			os.Exit(1)
+		}
+		if !hasInput {
+			fmt.Fprintln(os.Stderr, "INCORRECT")
+			os.Exit(1)
+		}
+		if anyIncorrect {
+			os.Exit(1)
+		}
+		return
+	}
+	if len(numbers) == 0 {
 		fmt.Fprintln(os.Stderr, "INCORRECT")
 		os.Exit(1)
 	}
 	anyIncorrect := false
-	var okMessages []string
-	process := func(number string) {
-		if number == "" || !IsValid(number) {
+	for _, number := range numbers {
+		cleanNumber := strings.ReplaceAll(number, " ", "")
+		if cleanNumber == "" || !IsValid(cleanNumber) {
 			fmt.Fprintln(os.Stderr, "INCORRECT")
 			anyIncorrect = true
 		} else {
-			okMessages = append(okMessages, "OK")
+			fmt.Println("OK")
 		}
 	}
-	if useStdin {
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Split(bufio.ScanWords)
-		for scanner.Scan() {
-			process(scanner.Text())
-		}
-	} else {
-		for _, number := range numbers {
-			process(number)
-		}
-	}
-	if len(okMessages) > 0 {
-		fmt.Print(strings.Join(okMessages, "\n"))
-	}
-
 	if anyIncorrect {
 		os.Exit(1)
 	}
@@ -46,17 +59,51 @@ func HandleValidate(args []string) {
 
 func HandleGenerate(args []string) {
 	flags := map[string]string{"--pick": "false"}
-	patterns, _ := extractValues(args, flags)
+	patterns, useStdin := extractValues(args, flags)
+	if useStdin {
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Split(bufio.ScanWords)
+		hasInput := false
+		for scanner.Scan() {
+			hasInput = true
+			pattern := scanner.Text()
+			generated, err := Generate(pattern)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				os.Exit(1)
+			}
+			if flags["--pick"] == "true" {
+				picked, err := PickRandom(generated)
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err.Error())
+					os.Exit(1)
+				}
+				fmt.Println(picked)
+			} else {
+				for _, num := range generated {
+					fmt.Println(num)
+				}
+			}
+		}
+		if !hasInput {
+			fmt.Fprintln(os.Stderr, "входные данные не предоставлены")
+			os.Exit(1)
+		}
+		return
+	}
 	if len(patterns) != 1 {
+		fmt.Fprintln(os.Stderr, "требуется ровно один шаблон")
 		os.Exit(1)
 	}
 	generated, err := Generate(patterns[0])
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 	if flags["--pick"] == "true" {
 		picked, err := PickRandom(generated)
 		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
 		fmt.Println(picked)
@@ -71,66 +118,99 @@ func HandleInformation(args []string) {
 	flags := map[string]string{"--brands": "", "--issuers": ""}
 	numbers, useStdin := extractValues(args, flags)
 	if flags["--brands"] == "" || flags["--issuers"] == "" {
-		os.Exit(1)
-	}
-	if !useStdin && len(numbers) == 0 {
+		fmt.Fprintln(os.Stderr, "требуются оба флага: --brands и --issuers")
 		os.Exit(1)
 	}
 	brandData, err := ReadDataFile(flags["--brands"])
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 	issuerData, err := ReadDataFile(flags["--issuers"])
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
-	}
-	var outputs []string
-	process := func(number string) {
-		brand, issuer, validityString := "-", "-", "no"
-		if IsValid(number) {
-			validityString = "yes"
-			brand = FindMatch(number, brandData)
-			issuer = FindMatch(number, issuerData)
-		}
-		output := fmt.Sprintf("%s\nCorrect: %s\nCard Brand: %s\nCard Issuer: %s", number, validityString, brand, issuer)
-		outputs = append(outputs, output)
 	}
 	if useStdin {
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Split(bufio.ScanWords)
+		hasInput := false
 		for scanner.Scan() {
-			process(scanner.Text())
+			hasInput = true
+			number := strings.ReplaceAll(scanner.Text(), " ", "")
+			processInformationNumber(number, brandData, issuerData)
 		}
 		if err := scanner.Err(); err != nil && err != io.EOF {
+			fmt.Fprintln(os.Stderr, "ошибка чтения stdin")
 			os.Exit(1)
 		}
-	} else {
-		for _, number := range numbers {
-			process(number)
+		if !hasInput {
+			fmt.Fprintln(os.Stderr, "входные данные не предоставлены")
+			os.Exit(1)
+		}
+		return
+	}
+	if len(numbers) == 0 {
+		fmt.Fprintln(os.Stderr, "номера карт не предоставлены")
+		os.Exit(1)
+	}
+	for i, number := range numbers {
+		cleanNumber := strings.ReplaceAll(number, " ", "")
+		processInformationNumber(cleanNumber, brandData, issuerData)
+		if i < len(numbers)-1 {
+			fmt.Println()
 		}
 	}
-	fmt.Print(strings.Join(outputs, "\n"))
+}
+
+func processInformationNumber(number string, brandData, issuerData []BrandOrIssuer) {
+	brand, issuer, validityString := "-", "-", "no"
+	if IsValid(number) {
+		validityString = "yes"
+		if strings.Trim(number, "0") == "" {
+			validityString = "no"
+		}
+		brand = FindMatch(number, brandData)
+		issuer = FindMatch(number, issuerData)
+	}
+	fmt.Printf("%s\nCorrect: %s\nCard Brand: %s\nCard Issuer: %s",
+		number, validityString, brand, issuer)
 }
 
 func HandleIssue(args []string) {
 	flags := map[string]string{"--brands": "", "--issuers": "", "--brand": "", "--issuer": ""}
-	extractValues(args, flags)
-	for _, value := range flags {
+	remainingArgs, useStdin := extractValues(args, flags)
+	if len(remainingArgs) > 0 {
+		fmt.Fprintln(os.Stderr, "неожиданные аргументы")
+		os.Exit(1)
+	}
+	if useStdin {
+		fmt.Fprintln(os.Stderr, "stdin не поддерживается для команды issue")
+		os.Exit(1)
+	}
+	missingFlags := []string{}
+	for flagName, value := range flags {
 		if value == "" {
-			os.Exit(1)
+			missingFlags = append(missingFlags, flagName)
 		}
+	}
+	if len(missingFlags) > 0 {
+		fmt.Fprintln(os.Stderr, ".")
+		os.Exit(1)
 	}
 	brandData, err := ReadDataFile(flags["--brands"])
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 	issuerData, err := ReadDataFile(flags["--issuers"])
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
-
 	number, err := Issue(brandData, issuerData, flags["--brand"], flags["--issuer"])
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 	fmt.Println(number)

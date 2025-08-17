@@ -10,24 +10,23 @@ import (
 )
 
 func Generate(pattern string) ([]string, error) {
+	pattern = strings.ReplaceAll(pattern, " ", "")
 	asteriskCount := strings.Count(pattern, "*")
 	if asteriskCount == 0 {
-		return nil, fmt.Errorf("ошибка: в шаблоне отсутствуют символы '*'")
+		return nil, fmt.Errorf("шаблон должен содержать хотя бы одну звездочку")
 	}
 	if asteriskCount > 4 {
-		return nil, fmt.Errorf("ошибка: количество '*' должно быть от 1 до 4")
+		return nil, fmt.Errorf("шаблон не может содержать более 4 звездочек")
 	}
 	if !strings.HasSuffix(pattern, strings.Repeat("*", asteriskCount)) {
-		return nil, fmt.Errorf("ошибка: символы '*' должны находиться в конце шаблона")
+		return nil, fmt.Errorf("звездочки должны быть в конце шаблона")
 	}
 	base := strings.TrimSuffix(pattern, strings.Repeat("*", asteriskCount))
-	if len(base)+asteriskCount < 13 {
-		return nil, fmt.Errorf("ошибка: итоговый номер карты слишком короткий")
+	if len(base)+asteriskCount < 13 || len(base)+asteriskCount > 19 {
+		return nil, fmt.Errorf("длина шаблона должна быть не менее 13 символов и не более 19 символов")
 	}
-
 	var validNumbers []string
 	limit := int(math.Pow10(asteriskCount))
-
 	for i := 0; i < limit; i++ {
 		candidate := base + fmt.Sprintf("%0*d", asteriskCount, i)
 		if IsValid(candidate) {
@@ -40,7 +39,8 @@ func Generate(pattern string) ([]string, error) {
 
 func PickRandom(numbers []string) (string, error) {
 	if len(numbers) == 0 {
-		return "", fmt.Errorf("не удалось сгенерировать ни одного валидного номера")
+		return "", fmt.Errorf("нет доступных номеров для выбора")
 	}
-	return numbers[rand.New(rand.NewSource(time.Now().UnixNano())).Intn(len(numbers))], nil
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return numbers[r.Intn(len(numbers))], nil
 }

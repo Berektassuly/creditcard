@@ -8,7 +8,6 @@ func IsValid(cardNumber string) bool {
 	if len(cardNumber) < 13 {
 		return false
 	}
-
 	var sum int
 	var alternate bool
 	for i := len(cardNumber) - 1; i > -1; i-- {

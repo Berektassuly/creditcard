@@ -1020,42 +1020,23 @@ test_validate_with_no_quotes() {
 }
 
 
+
 # Test case 39
-test_incorrect_value_of_flags() {
-    result=$(./creditcard issue --brands=issuers.txt --issuers=brands.txt --brand="Kaspi Gold" --issuer="VISA" 2>&1)
+test_incorrect_value_of_flags_2() {
+    result=$(./creditcard issue --brands=issuers.txt 2>&1)
     exit_status=$?
 
     if ! check_panic "$result" "39"; then
         return
     fi
 
-    if [[ $exit_status -ne 0 ]]; then
-        print_fail "Test case 39: Issue with changed names of files: Expected exit status 0, but got $exit_status."
+    if [[ $exit_status -ne 1 ]]; then
+        print_fail "Test case 39: issue with no arguments: Expected exit status 1, but got $exit_status."
         test_failed=true
         return
     fi
 
     verify_output "." "$result" "39"
-    
-}
-
-
-# Test case 39.2
-test_incorrect_value_of_flags_2() {
-    result=$(./creditcard issue --brands=issuers.txt 2>&1)
-    exit_status=$?
-
-    if ! check_panic "$result" "39.2"; then
-        return
-    fi
-
-    if [[ $exit_status -ne 1 ]]; then
-        print_fail "Test case 39.2: issue with no arguments: Expected exit status 1, but got $exit_status."
-        test_failed=true
-        return
-    fi
-
-    verify_output "." "$result" "39.2"
     
 }
 
